@@ -1,14 +1,9 @@
-/*
- * ImageEnhancer.java
- * (c) By Steve Tanimoto,  January 2, 2016,
- * with contributions by Si J. Liu, 
- * and originally inspired by a tutorial example at Oracle.com.
- * This image-editing application includes support for semi-automated grading
- * when used in the CSE 373 course assignment on applying stacks and queues.
- * [CSE 373, Autumn 2016, Assignment 1.]
- *
- * CSE 373 Students: Add and modify code where indicated in order to add 
- * the Undo and Redo functionality specified on the assignment's web page.
+/* ImageEnhancerWithUndoAndRedo.java
+ * by Cooper Cain for CSE 373 Assignment 1, Autumn, 2016.
+ * Section BF.
+ * This program is an enhanced version of one provided by Oracle.com and
+ * subsequently modified by S. Tanimoto, instructor for the course.
+ * 
  */
 
 import java.awt.Component;
@@ -51,8 +46,8 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
     public static JMenuItem exitItem, undoItem, redoItem, darkenItem,
     	blurItem, sharpenItem, photoNegItem, thresholdItem;
 
-    // CSE 373 Students: Here, you should declare two variables to hold instances
-    //  of your stack class, with one for Undo and one for Redo.
+    BufferedImageStack undo;
+    BufferedImageStack redo;
     
 
     // A 3x3 filtering kernel for high-pass filtering:
@@ -156,8 +151,9 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
             System.exit(1);
         }
         
-        //  CSE 373 Students: Add code to create empty stack instances for the Undo stack 
-        //  and the Redo stack, and put your code for this here:
+        undo = new BufferedImageStack();
+        redo = new BufferedImageStack();
+        
         
     }
 
@@ -192,7 +188,7 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
         //  Also add code to enable and disable the Undo and Redo menu items, and to process
         //  these items when the user selects them.
 
-    	//System.out.println("The actionEvent is "+e); // This can be useful when debugging.
+    	System.out.println("The actionEvent is "+e); // This can be useful when debugging.
     	if (e.getSource()==exitItem) { System.exit(0); }
     	if (e.getSource()==blurItem) { blur(); }
     	if (e.getSource()==sharpenItem) { sharpen(); }
