@@ -187,14 +187,49 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
         //	undoing and dispose of any redoable actions.
         //  Also add code to enable and disable the Undo and Redo menu items, and to process
         //  these items when the user selects them.
+    	
+    	/*
+    	 * test if stack size != 0 to enable disable at the bottom
+    	 * If anything but undo and redo, add current img to undo stack
+    	 * if undo, add the current to redo stack and make current undo.pop
+    	 * if redo, add current to undo and make current redo.pop
+    	 * redo = new BufferedImageStack();
+    	 */
 
     	System.out.println("The actionEvent is "+e); // This can be useful when debugging.
-    	if (e.getSource()==exitItem) { System.exit(0); }
-    	if (e.getSource()==blurItem) { blur(); }
-    	if (e.getSource()==sharpenItem) { sharpen(); }
-    	if (e.getSource()==darkenItem) { darken(); }
-    	if (e.getSource()==photoNegItem) { photoneg(); }
-    	if (e.getSource()==thresholdItem) { threshold(); }
+    	if (e.getSource()==redoItem)
+    	{
+    		
+    	} else if (e.getSource()==undoItem)
+    	{
+    		
+    	} else 
+    	{
+    		redo = new BufferedImageStack();
+    		if (e.getSource()==exitItem) { System.exit(0); }
+        	if (e.getSource()==blurItem) { blur(); }
+        	if (e.getSource()==sharpenItem) { sharpen(); }
+        	if (e.getSource()==darkenItem) { darken(); }
+        	if (e.getSource()==photoNegItem) { photoneg(); }
+        	if (e.getSource()==thresholdItem) { threshold(); }
+    	}
+    	//Set active for redo/undo
+    	if(redo.getSize() == 0) 
+    	{
+    		redoItem.setEnabled(false);
+    	} else 
+    	{
+    		redoItem.setEnabled(true);
+    	}
+    	
+    	if(undo.getSize() == 0)
+    	{
+    		undoItem.setEnabled(false);
+    	} else
+    	{
+    		undoItem.setEnabled(true);
+    	}
+    	
         gWorking.drawImage(biFiltered, 0, 0, null); // Draw the pixels from biFiltered into biWorking.
         repaint(); // Ask Swing to update the screen.
         printNumbersOfElementsInBothStacks(); // Report on the states of the stacks.
@@ -229,9 +264,7 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
     }
     
     public void printNumbersOfElementsInBothStacks() {
-    	//  CSE 373 Students: Uncomment this code that prints out the numbers of elements
-    	//  in each of the two stacks (Undo and Redo):
-        //System.out.println("The Undo stack contains " + undoStack.getSize() + " elements.");
-        //System.out.println("The Redo stack contains " + redoStack.getSize() + " elements.");
+        System.out.println("The Undo stack contains " + undo.getSize() + " elements.");
+        System.out.println("The Redo stack contains " + redo.getSize() + " elements.");
     }
 }
