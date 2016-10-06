@@ -42,8 +42,8 @@ public class BufferedImageStack
 			throw new EmptyStackException();
 		} else 
 		{
-			BufferedImage temp =  arr[size];
-			arr[size] = null;
+			BufferedImage temp =  arr[size - 1];
+			arr[size - 1] = null;
 			size--;
 			return temp;
 			//return last item in array and remove

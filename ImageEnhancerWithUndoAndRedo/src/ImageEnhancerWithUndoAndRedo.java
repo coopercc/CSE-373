@@ -197,15 +197,24 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
     	 */
 
     	System.out.println("The actionEvent is "+e); // This can be useful when debugging.
+    	
+    	BufferedImage temp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics g = temp.getGraphics();
+        g.drawImage(biWorking, 0, 0, null);
+    	
     	if (e.getSource()==redoItem)
     	{
-    		
+    		undo.push(temp);
+    		biFiltered = redo.pop();
     	} else if (e.getSource()==undoItem)
     	{
+    		redo.push(temp);
+    		biFiltered = undo.pop();
     		
     	} else 
     	{
     		redo = new BufferedImageStack();
+    		undo.push(temp);
     		if (e.getSource()==exitItem) { System.exit(0); }
         	if (e.getSource()==blurItem) { blur(); }
         	if (e.getSource()==sharpenItem) { sharpen(); }
