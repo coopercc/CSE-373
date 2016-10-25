@@ -7,6 +7,8 @@ public class BufferedImageStack
 	private int size; //number of contents in the array, also acts as the point where to push/pop
 	private BufferedImage[] arr; //array holding the images
 	
+	
+	//Initialize the Stack to size 2 and set # of contents "Size" to 0
 	public BufferedImageStack() 
 	{
 		arr = new BufferedImage[2];

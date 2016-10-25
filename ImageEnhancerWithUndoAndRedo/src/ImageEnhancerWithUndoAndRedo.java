@@ -3,6 +3,8 @@
  * Section BF.
  * This program is an enhanced version of one provided by Oracle.com and
  * subsequently modified by S. Tanimoto, instructor for the course.
+ * It allows for manipulation of an image as well as the ability to undo and redo
+ * those actions.
  * 
  */
 
@@ -46,8 +48,8 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
     public static JMenuItem exitItem, undoItem, redoItem, darkenItem,
     	blurItem, sharpenItem, photoNegItem, thresholdItem;
 
-    BufferedImageStack undo;
-    BufferedImageStack redo;
+    BufferedImageStack undo; //contains the BufferedImages previously displayed
+    BufferedImageStack redo; //contains the BufferedImages that have been undone
     
 
     // A 3x3 filtering kernel for high-pass filtering:
@@ -152,9 +154,7 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
         }
         
         undo = new BufferedImageStack();
-        redo = new BufferedImageStack();
-        
-        
+        redo = new BufferedImageStack();  
     }
 
     public Dimension getPreferredSize() {
@@ -183,18 +183,6 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
        
     // We handle menu selection events here: //
     public void actionPerformed(ActionEvent e) {
-        //  CSE 373 Students: Add code in this method to save the current buffered image for
-        //	undoing and dispose of any redoable actions.
-        //  Also add code to enable and disable the Undo and Redo menu items, and to process
-        //  these items when the user selects them.
-    	
-    	/*
-    	 * test if stack size != 0 to enable disable at the bottom
-    	 * If anything but undo and redo, add current img to undo stack
-    	 * if undo, add the current to redo stack and make current undo.pop
-    	 * if redo, add current to undo and make current redo.pop
-    	 * redo = new BufferedImageStack();
-    	 */
 
     	System.out.println("The actionEvent is "+e); // This can be useful when debugging.
     	
@@ -222,7 +210,8 @@ public class ImageEnhancerWithUndoAndRedo extends Component implements ActionLis
         	if (e.getSource()==photoNegItem) { photoneg(); }
         	if (e.getSource()==thresholdItem) { threshold(); }
     	}
-    	//Set active for redo/undo
+    	
+    	//Set undo and redo buttons to enabled or disabled
     	if(redo.getSize() == 0) 
     	{
     		redoItem.setEnabled(false);
