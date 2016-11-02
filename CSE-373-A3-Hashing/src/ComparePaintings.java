@@ -3,6 +3,7 @@
  *
  */
 public class ComparePaintings {
+	int bpp;
 
 	public ComparePaintings(){}; // constructor.
 	
@@ -10,7 +11,8 @@ public class ComparePaintings {
 	ColorHash countColors(String filename, int bitsPerPixel) {
 		ImageLoader newImg = new ImageLoader(filename);
 		//get img height and width, loop through all pixels and get colorKey. Increment because it's safer
-		ColorHash ch = new ColorHash(3, bitsPerPixel, "Quadradic Probing", 0.45);
+		ColorHash ch = new ColorHash(3, bitsPerPixel, "Quadradic Probing", 0.5);
+		bpp = bitsPerPixel;
 		for (int i = 0; i < newImg.getHeight(); i++) {
 			for (int j = 0; i < newImg.getWidth(); i++) {
 				ColorKey newKey = newImg.getColorKey(j, i, bitsPerPixel);
@@ -24,12 +26,25 @@ public class ComparePaintings {
 	double compare(ColorHash painting1, ColorHash painting2) {
 		// Implement this.
 		//make each a vector, compare 1 to 2 and return 
-		return 1.0; // Change this to return the actual similarity value.
+		FeatureVector fv1 = new FeatureVector(bpp);
+		FeatureVector fv2 = new FeatureVector(bpp);
+		fv1.getTheCounts(painting1);
+		fv2.getTheCounts(painting2);
+		
+		return fv1.cosineSimilarity(fv2);
+		
 	}
 
 	//	A basic test for the compare method: S(x,x) should be 1.0, so you should compute the similarity of an image with itself and print out the answer. If it comes out to be 1.0, that is a good sign for your implementation so far.
 	void basicTest(String filename) {
 		// Implement this.
+		ColorHash ch1 = countColors(filename, 9);
+		ColorHash ch2 = countColors(filename, 9);
+		FeatureVector fv1 = new FeatureVector(9);
+		FeatureVector fv2 = new FeatureVector(9);
+		fv1.getTheCounts(ch1);
+		fv2.getTheCounts(ch2);
+		
 		// countColors twice, make vector for each, compare
 	}
 
