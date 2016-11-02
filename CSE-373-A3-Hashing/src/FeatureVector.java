@@ -33,27 +33,37 @@ public class FeatureVector {
 	 */
 	public FeatureVector(int bpp) {
 		keySpaceSize = 1 << bpp;
+		bitsPerPixel = bpp;
 		colorCounts = new long[keySpaceSize];
 	}
 
 	public void getTheCounts(ColorHash ch) {
+		for (int i = 0; i < bitsPerPixel; i++) {
+			try {
+				ColorKey tempKey = new ColorKey(i, bitsPerPixel);
+				ResponseItem ri = ch.colorHashGet(tempKey);
+				colorCounts[i] = ri.value;
+			} catch (Exception e) {
+				colorCounts[i] = 0;
+				System.out.println(e);
+			}
+			
+		}
 		// You should implement this method.
 		// It will go through all possible key values in order,
 		// get the count from the hash table and put it into this feature vector.
 	}
-	public double cosineSimilarity(FeatureVector other) {
-		// Implement this method. Use the formula given in the A3 spec,
-		// which is also explained at
-		// https://en.wikipedia.org/wiki/Cosine_similarity
-		// where A is this feature vector and B is the other feature vector.
-		// When multiplying in the dot product, convert all the long values
-		// to double before doing the multiplication.
+	public double cosineSimilarity(FeatureVector b) {
 
-		// Hint: you may wish to write some private methods here to help
-		// computing the cosine similarity.  For example, it could be
-		// nice to have a dot product method and a vector magnitude method.
-
-		return 1.0; // Change this to return the actual value.
+		double dotProduct = 0.0;
+		double aMag = 0.0;
+		double bMag = 0.0;
+		for (int i = 0; i < colorCounts.length; i++) {
+			dotProduct += colorCounts[i] * b.colorCounts[i];
+			aMag += colorCounts[i] * colorCounts[i];
+			bMag += b.colorCounts[i] * b.colorCounts[i];
+		}
+		return dotProduct / (Math.sqrt(aMag) * Math.sqrt(bMag));
 	}
 
 	/**
