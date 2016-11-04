@@ -38,14 +38,13 @@ public class FeatureVector {
 	}
 
 	public void getTheCounts(ColorHash ch) {
-		for (int i = 0; i < bitsPerPixel; i++) {
+		for (int i = 0; i < keySpaceSize; i++) {
 			try {
 				ColorKey tempKey = new ColorKey(i, bitsPerPixel);
 				ResponseItem ri = ch.colorHashGet(tempKey);
 				colorCounts[i] = ri.value;
 			} catch (Exception e) {
 				colorCounts[i] = 0;
-				System.out.println(e);
 			}
 			
 		}
@@ -63,6 +62,7 @@ public class FeatureVector {
 			aMag += colorCounts[i] * colorCounts[i];
 			bMag += b.colorCounts[i] * b.colorCounts[i];
 		}
+		System.out.println("dotProd = " + dotProduct + ", aMag = " + Math.sqrt(aMag) + ", bMag = " + Math.sqrt(bMag));
 		return dotProduct / (Math.sqrt(aMag) * Math.sqrt(bMag));
 	}
 
