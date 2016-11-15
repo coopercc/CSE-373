@@ -1,0 +1,92 @@
+/**
+ * @author (your name goes here)
+ *
+ */
+public class ComparePaintings {
+	int bpp;
+
+	public ComparePaintings(){}; // constructor.
+	
+	// Load the image, construct the hash table, count the colors.
+	ColorHash countColors(String filename, int bitsPerPixel) {
+		ImageLoader newImg = new ImageLoader(filename);
+		//get img height and width, loop through all pixels and get colorKey. Increment because it's safer
+		ColorHash ch = new ColorHash(3, bitsPerPixel, "Quadradic Probing", 0.5);
+		bpp = bitsPerPixel;
+		for (int i = 0; i < newImg.getHeight(); i++) {
+			for (int j = 0; i < newImg.getWidth(); i++) {
+				ColorKey newKey = newImg.getColorKey(j, i, bitsPerPixel);
+				ch.increment(newKey);
+			}
+		}
+		return ch; // Change this to return the real result.
+	}
+
+//	Starting with two hash tables of color counts, compute a measure of similarity based on the cosine distance of two vectors.
+	double compare(ColorHash painting1, ColorHash painting2) {
+		// Implement this.
+		//make each a vector, compare 1 to 2 and return 
+		FeatureVector fv1 = new FeatureVector(bpp);
+		FeatureVector fv2 = new FeatureVector(bpp);
+		fv1.getTheCounts(painting1);
+		fv2.getTheCounts(painting2);
+		
+		return fv1.cosineSimilarity(fv2);
+		
+	}
+
+	//	A basic test for the compare method: S(x,x) should be 1.0, so you should compute the similarity of an image with itself and print out the answer. If it comes out to be 1.0, that is a good sign for your implementation so far.
+	void basicTest(String filename) {
+		// Implement this.
+		ColorHash ch1 = countColors(filename, 9);
+		ColorHash ch2 = countColors(filename, 9);
+		FeatureVector fv1 = new FeatureVector(9);
+		FeatureVector fv2 = new FeatureVector(9);
+		fv1.getTheCounts(ch1);
+		fv2.getTheCounts(ch2);
+		
+		// countColors twice, make vector for each, compare
+	}
+
+	//		Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of collision counts in the following format:
+	void CollisionTests() {
+		// Implement this.				
+	}
+	
+	void fullSimilarityTests() {
+		Object[][] table = new String[9][];
+		table[0] = new String[] {"Bits Per Pixel", "S(Mona,Starry)", "S(Mona,Christina)", "S(Starry,Christina)"};
+		for (int i = 1; i < 9; i++) {
+			int bpp = (9 - i) * 3;
+			ColorHash mona = countColors("MonaLisa.jpg", bpp);
+			ColorHash starry = countColors("StarryNight.jpg", bpp);
+			ColorHash christina = countColors("ChristinasWorld.jpg", bpp);
+			double monaStarry = compare(mona, starry);
+			double monaChristina = compare(mona, christina);
+			double starryChristina = compare(starry, christina);
+			table[i] = new String[] {Integer.toString(bpp), Double.toString(monaStarry), Double.toString(monaChristina), Double.toString(starryChristina)};
+		}
+		for (final Object[] row : table) {
+		    System.out.format("%15s%15s%15s\n", row);
+		}
+		
+	}
+		
+// This simply checks that the images can be loaded, so you don't have 
+// an issue with missing files or bad paths.
+	void imageLoadingTest() {
+		ImageLoader mona = new ImageLoader("MonaLisa.jpg");
+		ImageLoader starry = new ImageLoader("StarryNight.jpg");
+		ImageLoader christina = new ImageLoader("ChristinasWorld.jpg");
+		System.out.println("It looks like we have successfully loaded all three test images.");
+
+	}
+	/**
+	 * This is a basic testing function, and can be changed.
+	 */
+	public static void main(String[] args) {
+		ComparePaintings cp = new ComparePaintings();
+		cp.imageLoadingTest();
+	}
+
+}

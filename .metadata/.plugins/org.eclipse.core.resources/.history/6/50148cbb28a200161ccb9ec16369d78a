@@ -1,0 +1,123 @@
+/**
+ * @author (your name goes here)
+ *
+ */
+public class ComparePaintings {
+	int bpp;
+	int collisions;
+	String collisionResolution;
+
+	public ComparePaintings(){
+		collisionResolution = "Quadradic Probing";
+		collisions = 0;
+		bpp = 3;
+	}; // constructor.
+	
+	// Load the image, construct the hash table, count the colors.
+	ColorHash countColors(String filename, int bitsPerPixel) {
+		collisions = 0;
+		ImageLoader newImg = new ImageLoader(filename);
+		ColorHash ch = new ColorHash(3, bitsPerPixel, collisionResolution, 0.5);
+		bpp = bitsPerPixel;
+		for (int i = 0; i < newImg.getHeight(); i++) {
+			for (int j = 0; i < newImg.getWidth(); i++) {
+				ColorKey newKey = newImg.getColorKey(i, j, bitsPerPixel);
+				ResponseItem res = ch.increment(newKey);
+				collisions += res.nCollisions;
+			}
+		}
+		return ch; // Change this to return the real result.
+	}
+
+//	Starting with two hash tables of color counts, compute a measure of similarity based on the cosine distance of two vectors.
+	double compare(ColorHash painting1, ColorHash painting2) {
+		// Implement this.
+		//make each a vector, compare 1 to 2 and return 
+		FeatureVector fv1 = new FeatureVector(bpp);
+		FeatureVector fv2 = new FeatureVector(bpp);
+		fv1.getTheCounts(painting1);
+		fv2.getTheCounts(painting2);
+		
+		return fv1.cosineSimilarity(fv2);
+		
+	}
+
+	//	A basic test for the compare method: S(x,x) should be 1.0, so you should compute the similarity of an image with itself and print out the answer. If it comes out to be 1.0, that is a good sign for your implementation so far.
+	void basicTest(String filename) {
+		// Implement this.
+		ColorHash ch1 = countColors(filename, bpp);
+		ColorHash ch2 = countColors(filename, bpp);
+		System.out.println(compare(ch1, ch2));
+	}
+
+	//		Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of collision counts in the following format:
+	void CollisionTests() {
+		// Implement this.
+		Object[][] table = new String[9][];
+		table[0] = new String[] {"Bits Per Pixel ", "C(Mona,linear) ", "C(Mona,quadratic) ", "C(Starry,linear) ", "C(Starry,quadratic) ", "C(Christina,linear) ", "C(Christina,quadratic) "};
+		for (int i = 1; i < 9; i++) {
+			int bits = (9 - i) * 3;
+			collisionResolution = "Linear Probing";
+			ColorHash monaLinear = countColors("MonaLisa.jpg", bits);
+			int one = collisions;
+			collisionResolution = "Quadradic Probing";
+			ColorHash monaQuad = countColors("MonaLisa.jpg", bits);
+			int two = collisions;
+			collisionResolution = "Linear Probing";
+			ColorHash starLinear = countColors("StarryNight.jpg", bits);
+			int three = collisions;
+			collisionResolution = "Quadradic Probing";
+			ColorHash starQuad = countColors("StarryNight.jpg", bits);
+			int four = collisions;
+			ColorHash christinaLinear = countColors("ChristinasWorld.jpg", bits);
+			int five = collisions;
+			collisionResolution = "Quadradic Probing";
+			ColorHash christinaQuad = countColors("ChristinasWorld.jpg", bits);
+			int six = collisions;
+			table[i] = new String[] {Integer.toString(bits), Integer.toString(one), Integer.toString(two), Integer.toString(three), Integer.toString(four), Integer.toString(five), Integer.toString(six)};
+		}
+		
+		for (final Object[] row : table) {
+			System.out.format("%-15s%10s%15s%16s%17s%18s%20s\n", row);
+		}
+		
+	}
+	
+	void fullSimilarityTests() {
+		Object[][] table = new String[9][];
+		table[0] = new String[] {"Bits Per Pixel ", "S(Mona,Starry) ", "S(Mona,Christina) ", "S(Starry,Christina) "};
+		for (int i = 1; i < 9; i++) {
+			int bits = (9 - i) * 3;
+			ColorHash mona = countColors("MonaLisa.jpg", bits);
+			ColorHash starry = countColors("StarryNight.jpg", bits);
+			ColorHash christina = countColors("ChristinasWorld.jpg", bits);
+			double monaStarry = compare(mona, starry);
+			double monaChristina = compare(mona, christina);
+			double starryChristina = compare(starry, christina);
+			table[i] = new String[] {Integer.toString(bits), Double.toString(monaStarry), Double.toString(monaChristina), Double.toString(starryChristina)};
+		}
+		for (final Object[] row : table) {
+		    System.out.format("", row);
+		}
+		
+	}
+		
+// This simply checks that the images can be loaded, so you don't have 
+// an issue with missing files or bad paths.
+	void imageLoadingTest() {
+		ImageLoader mona = new ImageLoader("MonaLisa.jpg");
+		ImageLoader starry = new ImageLoader("StarryNight.jpg");
+		ImageLoader christina = new ImageLoader("ChristinasWorld.jpg");
+		System.out.println("It looks like we have successfully loaded all three test images.");
+
+	}
+	/**
+	 * This is a basic testing function, and can be changed.
+	 */
+	public static void main(String[] args) {
+		ComparePaintings cp = new ComparePaintings();
+		//cp.CollisionTests();
+		cp.fullSimilarityTests();
+	}
+
+}
