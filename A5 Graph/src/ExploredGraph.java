@@ -1,14 +1,19 @@
 import java.util.List;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.Function;
 
 /**
- * 
+ * Things to add to code: 
+ *  + list object thing for OPEN and Closed
+ *  + successors method to return all V's that come after current V
+ *  
  */
 
 /**
@@ -30,19 +35,107 @@ public class ExploredGraph {
 	Set<Edge> Ee;   // collection of explored edges
 	
 	public ExploredGraph() {
-		Ve = new LinkedHashSet<Vertex>();
-		Ee = new LinkedHashSet<Edge>();
+		initialize();
 	}
 
 	public void initialize() {
 		// Implement this
+		Ve = new LinkedHashSet<Vertex>();
+		Ee = new LinkedHashSet<Edge>();
 	}
-	public int nvertices() {return 0;} // Implement this.
-	public int nedges() {return 0;}    // Implement this.
-	public void idfs(Vertex vi, Vertex vj) {} // Implement this. (Iterative Depth-First Search)
-	public void bfs(Vertex vi, Vertex vj) {} // Implement this. (Breadth-First Search)
-	public ArrayList<Vertex> retrievePath(Vertex vi) {return null;} // Implement this.
-	public ArrayList<Vertex> shortestPath(Vertex vi, Vertex vj) {return null;} // Implement this.
+	
+	public int nvertices() {
+		return Ve.size();
+	}
+	
+	public int nedges() {
+		return Ee.size();
+	}    
+	
+	// Implement this. (Iterative Depth-First Search)
+	/*
+	 * 
+	 * Procedure IDFS(v0, g):
+Set count = 0.
+Let OPEN = [v0]; Let CLOSED = []
+Set Pred(v0) = null;
+While OPEN is not empty:
+   v = OPEN.removeFirst()
+   Set Label(v) = count; count += 1.
+   S = successors(v);
+   For s in S:  
+      if s in OPEN or s in CLOSED, continue.
+      else insert s into OPEN at the front.
+              Set Pred(s) = v.
+   Insert v into CLOSED
+	 */
+	public void idfs(Vertex vi, Vertex vj) {
+		search(vi, vj, "idfs");
+	} 
+	
+	// Implement this. (Breadth-First Search)
+	//order to test 0,1 -> 0,2 -> 1,0 -> 1,2 -> 2,0 -> 2,1
+	public void bfs(Vertex vi, Vertex vj) {
+		search(vi, vj, "bfs");
+	}
+	
+	public void search(Vertex vi, Vertex vj, String type) {
+		int count = 0;
+		LinkedList<Vertex> open = new LinkedList<Vertex>();
+		LinkedList<Vertex> closed = new LinkedList<Vertex>();
+		open.add(vi);
+		vi.PRED = null;
+		while (!open.isEmpty()) {
+			Vertex v = open.removeFirst();
+			List<Vertex> S = successors(v);
+			for (Vertex s : S) {
+				if (!open.contains(s) && !closed.contains(s)) {
+					if(type.equals("idfs")) {
+						open.addFirst(s);
+					} else {
+						open.addLast(s);
+					}
+					s.PRED = v;
+					Edge temp = new Edge(v, s);
+					Ee.add(temp);
+				}
+				if (s.equals(vj)) {
+					open.clear();
+				}
+			}
+			closed.add(v);
+			Ve.add(v);
+		}
+	}
+	
+	public List<Vertex> successors(Vertex v) {
+		Operator[] arr = new Operator[6];
+		arr[0] =  new Operator(0, 1);
+		arr[1] = new Operator(0, 2);
+		arr[2] = new Operator(1, 0);
+		arr[3] = new Operator(1, 2);
+		arr[4] = new Operator(2, 0);
+		arr[5] = new Operator(2, 1);
+		
+		List<Vertex> ret = new ArrayList<Vertex>();
+		for(int i = 0; i < arr.length; i++) {
+			boolean test = arr[i].precondition(v);
+			if (test) {
+				ret.add(arr[i].transition(v));
+			}
+		}
+		return ret;
+		
+	}
+	
+	public ArrayList<Vertex> retrievePath(Vertex vi) {
+		return null;
+	}
+	
+	public ArrayList<Vertex> shortestPath(Vertex vi, Vertex vj) {
+		return null;
+	} // Implement this.
+	
 	public Set<Vertex> getVertices() {return Ve;} 
 	public Set<Edge> getEdges() {return Ee;} 
 	/**
@@ -60,6 +153,7 @@ public class ExploredGraph {
 	
 	class Vertex {
 		ArrayList<Stack<Integer>> pegs; // Each vertex will hold a Towers-of-Hanoi state.
+		Vertex PRED;
 		// There will be 3 pegs in the standard version, but more if you do extra credit option A5E1.
 		
 		// Constructor that takes a string such as "[[4,3,2,1],[],[]]":
@@ -147,7 +241,7 @@ public class ExploredGraph {
 		public String toString() {
 			// TODO: Add code to return a string good enough
 			// to distinguish different operators
-			return "Moving disk from " + i + " to " + j;
+			return "peg " + i + " to " + j;
 		}
 	}
 
