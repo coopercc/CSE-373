@@ -2,6 +2,8 @@ import java.util.List;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -33,58 +35,57 @@ import java.util.function.Function;
 public class ExploredGraph {
 	Set<Vertex> Ve; // collection of explored vertices
 	Set<Edge> Ee;   // collection of explored edges
+	Hashtable<Vertex, Vertex> preds; //vertexes and their predecessor
 	
 	public ExploredGraph() {
 		initialize();
 	}
 
+	// sets the collection of vertices and edges as new sets, and creates a new table
+	// for the predecessors.
 	public void initialize() {
 		// Implement this
 		Ve = new LinkedHashSet<Vertex>();
 		Ee = new LinkedHashSet<Edge>();
+		preds = new Hashtable<Vertex, Vertex>();
+		
 	}
 	
+	//return number of vertices
 	public int nvertices() {
 		return Ve.size();
 	}
 	
+	//return number of edges
 	public int nedges() {
 		return Ee.size();
 	}    
 	
-	// Implement this. (Iterative Depth-First Search)
 	/*
-	 * 
-	 * Procedure IDFS(v0, g):
-Set count = 0.
-Let OPEN = [v0]; Let CLOSED = []
-Set Pred(v0) = null;
-While OPEN is not empty:
-   v = OPEN.removeFirst()
-   Set Label(v) = count; count += 1.
-   S = successors(v);
-   For s in S:  
-      if s in OPEN or s in CLOSED, continue.
-      else insert s into OPEN at the front.
-              Set Pred(s) = v.
-   Insert v into CLOSED
+	 * Accepts a beginning and end vertex and maps out the vertexes between them 
+	 * through depth-first searching
 	 */
 	public void idfs(Vertex vi, Vertex vj) {
 		search(vi, vj, "idfs");
 	} 
 	
-	// Implement this. (Breadth-First Search)
-	//order to test 0,1 -> 0,2 -> 1,0 -> 1,2 -> 2,0 -> 2,1
+	/* 
+	 * Accepts a beginning and end vertex and maps out the vertexes between them 
+	 * through Breadth-First Search
+	 */
 	public void bfs(Vertex vi, Vertex vj) {
 		search(vi, vj, "bfs");
 	}
 	
+	/*
+	 * Accepts a beginning and end vertex as well as the type of search
+	 * and maps the different states until it finds the end vertex
+	 */
 	public void search(Vertex vi, Vertex vj, String type) {
-		int count = 0;
+		initialize();
 		LinkedList<Vertex> open = new LinkedList<Vertex>();
 		LinkedList<Vertex> closed = new LinkedList<Vertex>();
 		open.add(vi);
-		vi.PRED = null;
 		while (!open.isEmpty()) {
 			Vertex v = open.removeFirst();
 			List<Vertex> S = successors(v);
@@ -95,19 +96,24 @@ While OPEN is not empty:
 					} else {
 						open.addLast(s);
 					}
-					s.PRED = v;
+					preds.put(s, v);
 					Edge temp = new Edge(v, s);
 					Ee.add(temp);
-				}
-				if (s.equals(vj)) {
-					open.clear();
+					Vertex pred = preds.get(s);
+					System.out.println(s.toString() + " to " + pred.toString());
 				}
 			}
 			closed.add(v);
 			Ve.add(v);
+			if (v.equals(vj)) {
+				open.clear();
+			}
 		}
 	}
 	
+	/*
+	 * accepts a vertex and returns the possible vertexes that can follow it
+	 */
 	public List<Vertex> successors(Vertex v) {
 		Operator[] arr = new Operator[6];
 		arr[0] =  new Operator(0, 1);
@@ -119,21 +125,36 @@ While OPEN is not empty:
 		
 		List<Vertex> ret = new ArrayList<Vertex>();
 		for(int i = 0; i < arr.length; i++) {
-			boolean test = arr[i].precondition(v);
+			Vertex temp = new Vertex(v.toString());
+			boolean test = arr[i].precondition(temp);
 			if (test) {
-				ret.add(arr[i].transition(v));
+				ret.add(arr[i].transition(temp));
 			}
 		}
 		return ret;
 		
 	}
 	
-	public ArrayList<Vertex> retrievePath(Vertex vi) {
-		return null;
+	/*
+	 * returns the path between the passed in vertex and the beginning vertex by
+	 * searching through the predecessor table
+	 */
+	public ArrayList<Vertex> retrievePath(Vertex vj) {
+		ArrayList<Vertex> ls = new ArrayList<Vertex>();
+		Vertex curr = vj;
+		ls.add(curr);
+		while(preds.containsKey(curr)) {
+			ls.add(preds.get(curr));
+			curr = preds.get(curr);
+		}
+		Collections.reverse(ls);
+		return ls;
 	}
 	
+	//returns the optimal path by checking bfs then returning retrievePath
 	public ArrayList<Vertex> shortestPath(Vertex vi, Vertex vj) {
-		return null;
+		bfs(vi,vj);
+		return retrievePath(vj);
 	} // Implement this.
 	
 	public Set<Vertex> getVertices() {return Ve;} 
@@ -145,15 +166,22 @@ While OPEN is not empty:
 		ExploredGraph eg = new ExploredGraph();
 		// Test the vertex constructor: 
 		Vertex v0 = eg.new Vertex("[[4,3,2,1],[],[]]");
-		System.out.println(v0);
+		Vertex v1 = eg.new Vertex("[[],[],[4,3,2,1]]");
+		eg.bfs(v0, v1);
+		eg.idfs(v0, v1);
+		System.out.println(eg.retrievePath(v1));
+		System.out.println(eg.nedges());
+		System.out.println(eg.nvertices());
 		// Add your own tests here.
 		// The autograder code will be used to test your basic functionality later.
 
 	}
 	
+	/*
+	 * holds the state of the Tower game
+	 */
 	class Vertex {
 		ArrayList<Stack<Integer>> pegs; // Each vertex will hold a Towers-of-Hanoi state.
-		Vertex PRED;
 		// There will be 3 pegs in the standard version, but more if you do extra credit option A5E1.
 		
 		// Constructor that takes a string such as "[[4,3,2,1],[],[]]":
@@ -166,12 +194,12 @@ While OPEN is not empty:
 					parts[i]=parts[i].replaceAll("\\[","");
 					parts[i]=parts[i].replaceAll("\\]","");
 					List<String> al = new ArrayList<String>(Arrays.asList(parts[i].split(",")));
-					System.out.println("ArrayList al is: "+al);
+					
 					Iterator<String> it = al.iterator();
 					while (it.hasNext()) {
 						String item = it.next();
                         if (!item.equals("")) {
-                                System.out.println("item is: "+item);
+                                
                                 pegs.get(i).push(Integer.parseInt(item));
                         }
 					}
@@ -179,6 +207,9 @@ While OPEN is not empty:
 				catch(NumberFormatException nfe) { nfe.printStackTrace(); }
 			}		
 		}
+		
+		
+		//returns the game state as a string
 		public String toString() {
 			String ans = "[";
 			for (int i=0; i<3; i++) {
@@ -188,56 +219,89 @@ While OPEN is not empty:
 			ans += "]";
 			return ans;
 		}
+		
+		//override the equals method to test if the strings of the vertexes are equal
+		@Override
+		public boolean equals(Object obj) {
+			return toString().equals(obj.toString());
+		}
+		
+		//Overrides the hashcode method to something new
+		@Override
+		public int hashCode() {
+			int hash = 1;
+			hash = hash * 13 + pegs.get(0).toString().hashCode();
+			hash = hash * 17 + pegs.get(1).toString().hashCode();
+			hash = hash * 31 + pegs.get(2).toString().hashCode();
+			
+			return hash;
+		}
+		
+		
 	}
 	
 	class Edge {
-		Vertex endpoint1;
-		Vertex endpoint2;
+		Vertex endpoint1; // first vertex
+		Vertex endpoint2; // second vertex
 		
+		//initializes the edge
 		public Edge(Vertex vi, Vertex vj) {
 			// Add whatever you need to here.
 			endpoint1 = vi;
 			endpoint2 = vj;
 		}
 		
+		//returns the string representing the edge
 		public String toString() {
 			return "Edge from " + endpoint1.toString() + " to " + endpoint2.toString();
 		}
 		
+		//returns endpoint1
 		public Vertex getEndpoint1() {
 			return endpoint1;
 		}
 		
+		//returns endpoint2
 		public Vertex getEndpoint2() {
 			return endpoint2;
 		}
 	}
 	
+	//represents a change in the game state
 	class Operator {
-		private int i, j;
+		private int i, j; // i and j represent the move of a disk from peg i to peg j
 
+		//initializes the move
 		public Operator(int i, int j) { // Constructor for operators.
 			this.i = i;
 			this.j = j;
 		}
 
+		//returns whether or not the move from i to j for Vertex v is acceptable or not
 		public boolean precondition(Vertex v) {
-			Integer iVar = v.pegs.get(i).peek();
-			Integer jVar = v.pegs.get(j).peek();		
-			if (iVar > jVar || iVar == null) {
+			Stack<Integer> pegOne = v.pegs.get(i);
+			Stack<Integer> pegTwo = v.pegs.get(j);
+			if (pegOne.isEmpty()) {
+				return false;
+			} else if (pegTwo.isEmpty()) {
+				return true;
+			} else if (pegOne.peek() > pegTwo.peek()) {
 				return false;
 			} else {
 				return true;
 			}
 		}
 
+		//returns a new vertex after applying the operator transition
 		public Vertex transition(Vertex v) {
-			Stack<Integer> iStack = v.pegs.get(i);
-			Stack<Integer> jStack = v.pegs.get(j);
+			Vertex temp = new Vertex(v.toString());
+			Stack<Integer> iStack = temp.pegs.get(i);
+			Stack<Integer> jStack = temp.pegs.get(j);
 			jStack.push(iStack.pop());
-			return v; 
+			return temp; 
 		}
 
+		//returns a string representing the operator move
 		public String toString() {
 			// TODO: Add code to return a string good enough
 			// to distinguish different operators
