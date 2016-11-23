@@ -19,8 +19,7 @@ import java.util.function.Function;
  */
 
 /**
- * @author your name(s) here.
- * Extra Credit Options Implemented, if any:  (mention them here.)
+ * @author Cooper Cain
  * 
  * Solution to Assignment 5 in CSE 373, Autumn 2016
  * University of Washington.
